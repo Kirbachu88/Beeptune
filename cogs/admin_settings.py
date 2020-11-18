@@ -40,7 +40,7 @@ class AdminSettings(commands.Cog):
         elif verb == "competing":
             # Setting `Competing in` status
             await self.client.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=noun))
-            await ctx.send("Now " + verb + " " + noun)
+            await ctx.send("Now " + verb + " in " + noun)
         else:
             await self.client.change_presence(
                 activity=discord.Activity(type=discord.ActivityType.watching, name="your every move"))
