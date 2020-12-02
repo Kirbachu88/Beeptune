@@ -1,7 +1,10 @@
 import discord
 from discord.ext import commands
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageFilter
+from io import BytesIO
+import requests
 import textwrap
+import re
 
 
 class Images(commands.Cog):
@@ -16,6 +19,39 @@ class Images(commands.Cog):
 
     # Commands
     @commands.command()
+    async def cloud(self, ctx):
+        string = str(ctx.message.content)
+        string_slice = string[8:]
+        url = ctx.message.author.avatar_url
+
+        has_mention = re.match(r'<@!?(\d+)>', string_slice)
+        is_url = re.match(r'(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)', string_slice)
+
+        if has_mention:
+            url = ctx.message.mentions[0].avatar_url
+        elif is_url:
+            url = string_slice
+
+        print(f'{ctx.author} generated with Cloud: {url}')
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((150, 150))
+        # img = ImageOps.grayscale(img)
+
+        im_a = Image.new("L", img.size, 0)
+        draw = ImageDraw.Draw(im_a)
+        draw.rectangle((0, 0, 150, 150), fill=255)
+
+        im_a = im_a.rotate(20, resample=Image.BILINEAR, expand=True)
+        img = img.rotate(20, resample=Image.BILINEAR, expand=True)
+
+        cloud = Image.open('./templates/cloud.png')
+        cloud.paste(img, (425, 413), im_a)
+        cloud.save('cloud_generated.png')
+        await ctx.message.delete()
+        await ctx.send(file=discord.File('cloud_generated.png'))
+
+    @commands.command()
     async def exist(self, ctx, *, text=""):
         print(f'{ctx.author} generated with Exist: {text}')
         exist = Image.open('./templates/exist.png')
@@ -27,7 +63,7 @@ class Images(commands.Cog):
         current_h, pad = 50, 10
         for line in para:
             w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 460, current_h + 50), line, (0,0,0), font=font)
+            draw.text((((MAX_W - w) / 2) + 460, current_h + 50), line, (0, 0, 0), font=font)
             current_h += h + pad
 
         exist.save('exist_generated.png')
