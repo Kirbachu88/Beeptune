@@ -69,39 +69,39 @@ class Images(commands.Cog):
         exist.save('exist_generated.png')
         await ctx.send(file=discord.File('exist_generated.png'))
 
-@commands.command()
-    async def jim(self, ctx, *, text=""):
-        print(f'{ctx.author} generated with Jim: {text}')
-        test = Image.open('./templates/jim.jpg')
-        draw = ImageDraw.Draw(test)
+    @commands.command()
+        async def jim(self, ctx, *, text=""):
+            print(f'{ctx.author} generated with Jim: {text}')
+            test = Image.open('./templates/jim.jpg')
+            draw = ImageDraw.Draw(test)
 
-        text_top = text
-        text_bot = ''
+            text_top = text
+            text_bot = ''
 
-        if re.match(r'.*\..*', text):
-            split = text.split('.', 1)
-            text_top = split[0]
-            text_bot = split[1]
+            if re.match(r'.*\..*', text):
+                split = text.split('.', 1)
+                text_top = split[0]
+                text_bot = split[1]
 
-        para_top = textwrap.wrap(text_top, width=21)
-        para_bot = textwrap.wrap(text_bot, width=19)
-        MAX_W, MAX_H = 250, 150
-        font = ImageFont.truetype("cc-astro-city.ttf", 28)
+            para_top = textwrap.wrap(text_top, width=21)
+            para_bot = textwrap.wrap(text_bot, width=19)
+            MAX_W, MAX_H = 250, 150
+            font = ImageFont.truetype("cc-astro-city.ttf", 28)
 
-        current_h, pad = 50, 10
-        for line in para_top:
-            w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 95, current_h), line, (0, 0, 0), font=font)
-            current_h += h + pad
+            current_h, pad = 50, 10
+            for line in para_top:
+                w, h = draw.textsize(line, font=font)
+                draw.text((((MAX_W - w) / 2) + 95, current_h), line, (0, 0, 0), font=font)
+                current_h += h + pad
 
-        current_h, pad = 450, 10
-        for line in para_bot:
-            w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 70, current_h), line, (0, 0, 0), font=font)
-            current_h += h + pad
+            current_h, pad = 450, 10
+            for line in para_bot:
+                w, h = draw.textsize(line, font=font)
+                draw.text((((MAX_W - w) / 2) + 70, current_h), line, (0, 0, 0), font=font)
+                current_h += h + pad
 
-        test.save('jim_generated.jpg')
-        await ctx.send(file=discord.File('jim_generated.jpg'))
+            test.save('jim_generated.jpg')
+            await ctx.send(file=discord.File('jim_generated.jpg'))
 
     @commands.command()
     async def uno(self, ctx, *, text=""):
