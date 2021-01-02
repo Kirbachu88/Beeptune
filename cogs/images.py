@@ -69,15 +69,19 @@ class Images(commands.Cog):
         exist.save('exist_generated.png')
         await ctx.send(file=discord.File('exist_generated.png'))
 
-    @commands.command()
+@commands.command()
     async def jim(self, ctx, *, text=""):
         print(f'{ctx.author} generated with Jim: {text}')
         test = Image.open('./templates/jim.jpg')
         draw = ImageDraw.Draw(test)
 
-        split = text.split('.', 1)
-        text_top = split[0]
-        text_bot = split[1]
+        text_top = text
+        text_bot = ''
+
+        if re.match(r'.*\..*', text):
+            split = text.split('.', 1)
+            text_top = split[0]
+            text_bot = split[1]
 
         para_top = textwrap.wrap(text_top, width=21)
         para_bot = textwrap.wrap(text_bot, width=19)
