@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import random
+import textwrap
 
 
 class Fun(commands.Cog):
@@ -43,6 +44,56 @@ class Fun(commands.Cog):
             generated_list = generated_list + f'{tier_emoji[9]} {tier_list[-1]}'
 
         await ctx.send(f'Here is your generated tier list!\n\n{generated_list}')
+
+    @commands.command(pass_context=True, aliases=['coin', 'coinflip'])
+    async def flip(self, ctx, text=""):
+        if text.isnumeric():
+            count = int(text)
+            if count > 100:
+                count = 100
+            elif count < 1:
+                count = 1
+        else:
+            count = 1
+
+        print(f'{ctx.author} flipped {count} coin(s)')
+        samples = [random.randint(1, 2) for _ in range(count)]
+        heads = samples.count(1)
+        tails = samples.count(2)
+
+        result = ""
+        for i in samples:
+            result = result + '🌝' if i == 1 else result + '🌑'
+
+        result = textwrap.fill(result, 10)
+
+        # Creating a fancy embed
+        embed = discord.Embed(
+            title="Coin Flip Results!",
+            description=result,
+            color=discord.Color.gold()
+        )
+
+        if heads > tails:
+            result_img = 'https://noto-website-2.storage.googleapis.com/emoji/emoji_u1f315.png'
+        elif tails > heads:
+            result_img = 'https://noto-website-2.storage.googleapis.com/emoji/emoji_u1f311.png'
+        else:
+            result_img = 'https://noto-website-2.storage.googleapis.com/emoji/emoji_u1f317.png'
+
+        embed.set_thumbnail(url=result_img)
+
+        if count > 1:
+            embed.add_field(name=f'{ctx.message.author.nick} flipped __{count}__ coins!',
+                            value=f'It\'s **{heads}** heads to **{tails}** tails!')
+        elif heads > tails:
+            embed.add_field(name=f'{ctx.message.author.nick} flipped a coin!',
+                            value=f'It\'s **heads!**')
+        else:
+            embed.add_field(name=f'{ctx.message.author.nick} flipped a coin!',
+                            value=f'It\'s **tails!**')
+
+        await ctx.send(embed=embed)
 
 
 def setup(client):
