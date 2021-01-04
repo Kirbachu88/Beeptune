@@ -7,7 +7,7 @@ import textwrap
 import re
 
 
-async def write_text(text_split, template, name, font_size, color, current_w, current_h, pad_w=0, pad_h=0, max_w=0):
+async def write_text(text_split, template, name, font_size, color, current_w, current_h, pad_w=0, pad_h=10, max_w=0):
     draw = ImageDraw.Draw(template)
     font = ImageFont.truetype("cc-astro-city.ttf", font_size)
     if max_w == 0:
@@ -20,7 +20,7 @@ async def write_text(text_split, template, name, font_size, color, current_w, cu
             w, h = draw.textsize(line, font=font)
             draw.text((((max_w - w) / 2) + current_w, current_h), line, color, font=font)
             current_w += pad_w
-            current_h += pad_h
+            current_h += h + pad_h
     template.save(f'./generated/{name}')
 
 
@@ -50,13 +50,13 @@ class Images(commands.Cog):
         max_w = 0
         if len(split) < 2:
             name = 'button.jpg'
+            split = textwrap.wrap(text, width=10)
             color = (255, 255, 255)
-            max_w = 200
-            current_w, pad_w, current_h, pad_h = 70, 0, 270, 0
+            max_w = 100
+            current_w, pad_w, current_h, pad_h = 120, 0, 225, 10
         elif len(split) == 2:
             name = 'button2.jpg'
-            font_size = 35
-            max_w = 200
+            font_size = 30
             current_w, pad_w, current_h, pad_h = 55, 215, 120, -40
         else:
             name = 'button4.jpg'
@@ -117,25 +117,17 @@ class Images(commands.Cog):
 
     @commands.command()
     async def exist(self, ctx, *, text=""):
-        print(f'{ctx.author} generated with Exist: {text}')
         template = Image.open('./templates/exist.png')
-        draw = ImageDraw.Draw(template)
+        name = 'exist.png'
         para = textwrap.wrap(text, width=19)
-        MAX_W, MAX_H = 450, 250
-        font = ImageFont.truetype("cc-astro-city.ttf", 44)
 
-        current_h, pad = 50, 10
-        for line in para:
-            w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 460, current_h + 50), line, (0, 0, 0), font=font)
-            current_h += h + pad
+        await write_text(para, template, name, 44, (0, 0, 0), 460, 100, max_w=450)
 
-        template.save('./generated/exist.png')
-        await ctx.send(file=discord.File('./generated/exist.png'))
+        print(f'{ctx.author} generated with Exist: {text}')
+        await ctx.send(file=discord.File(f'./generated/{name}'))
 
     @commands.command()
     async def jim(self, ctx, *, text=""):
-        print(f'{ctx.author} generated with Jim: {text}')
         template = Image.open('./templates/jim.jpg')
         draw = ImageDraw.Draw(template)
 
@@ -149,41 +141,36 @@ class Images(commands.Cog):
 
         para_top = textwrap.wrap(text_top, width=21)
         para_bot = textwrap.wrap(text_bot, width=19)
-        MAX_W, MAX_H = 250, 150
         font = ImageFont.truetype("cc-astro-city.ttf", 28)
 
-        current_h, pad = 50, 10
+        max_w = 250
+        pad_h = 10
+        current_h = 50
         for line in para_top:
             w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 95, current_h), line, (0, 0, 0), font=font)
-            current_h += h + pad
+            draw.text((((max_w - w) / 2) + 95, current_h), line, (0, 0, 0), font=font)
+            current_h += h + pad_h
 
-        current_h, pad = 450, 10
+        current_h = 450
         for line in para_bot:
             w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 70, current_h), line, (0, 0, 0), font=font)
-            current_h += h + pad
+            draw.text((((max_w - w) / 2) + 70, current_h), line, (0, 0, 0), font=font)
+            current_h += h + pad_h
 
         template.save('./generated/jim.jpg')
+        print(f'{ctx.author} generated with Jim: {text}')
         await ctx.send(file=discord.File('./generated/jim.jpg'))
 
     @commands.command()
     async def uno(self, ctx, *, text=""):
-        print(f'{ctx.author} generated with Uno: {text}')
         template = Image.open('./templates/uno.jpg')
-        draw = ImageDraw.Draw(template)
+        name = 'uno.jpg'
         para = textwrap.wrap(text, width=13)
-        MAX_W, MAX_H = 150, 90
-        font = ImageFont.truetype("cc-astro-city.ttf", 18)
 
-        current_h, pad = 170, 10
-        for line in para:
-            w, h = draw.textsize(line, font=font)
-            draw.text((((MAX_W - w) / 2) + 80, current_h), line, (0, 0, 0), font=font)
-            current_h += h + pad
+        await write_text(para, template, name, 18, (0, 0, 0), 80, 170, max_w=150)
 
-        template.save('./generated/uno.jpg')
-        await ctx.send(file=discord.File('./generated/uno.jpg'))
+        print(f'{ctx.author} generated with Uno: {text}')
+        await ctx.send(file=discord.File(f'./generated/{name}'))
 
 
 def setup(client):
