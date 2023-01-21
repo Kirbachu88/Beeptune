@@ -7,9 +7,12 @@ import textwrap
 import re
 
 
+font_name = './ccastro-city.ttf'
+
+
 async def write_text(text_split, template, name, font_size, color, current_w, current_h, pad_w=0, pad_h=10, max_w=0):
     draw = ImageDraw.Draw(template)
-    font = ImageFont.truetype("cc-astro-city.ttf", font_size)
+    font = ImageFont.truetype(font_name, font_size)
     if max_w == 0:
         for line in text_split:
             draw.text((current_w, current_h), line, color, font=font)
@@ -24,18 +27,21 @@ async def write_text(text_split, template, name, font_size, color, current_w, cu
     template.save(f'./generated/{name}')
 
 
-class Images(commands.Cog):
-
+class Images(commands.Cog, name='images'):
     def __init__(self, client):
         self.client = client
+
+    # New async cog_load special method is automatically called
+    async def cog_load(self):
+        print("Images: Loaded.")
 
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print("Images: Loaded.")
+        print("Images: Ready!")
 
     # Commands
-    @commands.command()
+    @commands.command(name='button')
     async def button(self, ctx, *, text=""):
         split = ['']
         if '\n' in text:
@@ -68,17 +74,17 @@ class Images(commands.Cog):
         print(f'{ctx.author} generated with Button: {text}')
         await ctx.send(file=discord.File(f'./generated/{name}'))
 
-    @commands.command()
+    @commands.command(name='cloud')
     async def cloud(self, ctx):
         string = str(ctx.message.content)
         string_slice = string[8:]
-        url = ctx.message.author.avatar_url
+        url = ctx.message.author.avatar.url
 
         has_mention = re.match(r'<@!?(\d+)>', string_slice)
         is_url = re.match(r'(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png)', string_slice)
 
         if has_mention:
-            url = ctx.message.mentions[0].avatar_url
+            url = ctx.message.mentions[0].avatar.url
         elif is_url:
             url = string_slice
 
@@ -115,7 +121,7 @@ class Images(commands.Cog):
             await ctx.message.delete()
             await ctx.send(file=discord.File('./generated/cloud.png'))
 
-    @commands.command()
+    @commands.command(name='exist')
     async def exist(self, ctx, *, text=""):
         template = Image.open('./templates/exist.png')
         name = 'exist.png'
@@ -126,7 +132,7 @@ class Images(commands.Cog):
         print(f'{ctx.author} generated with Exist: {text}')
         await ctx.send(file=discord.File(f'./generated/{name}'))
 
-    @commands.command()
+    @commands.command(name='jim')
     async def jim(self, ctx, *, text=""):
         template = Image.open('./templates/jim.jpg')
         draw = ImageDraw.Draw(template)
@@ -141,7 +147,7 @@ class Images(commands.Cog):
 
         para_top = textwrap.wrap(text_top, width=21)
         para_bot = textwrap.wrap(text_bot, width=19)
-        font = ImageFont.truetype("cc-astro-city.ttf", 28)
+        font = ImageFont.truetype(font_name, 28)
 
         max_w = 250
         pad_h = 10
@@ -161,7 +167,7 @@ class Images(commands.Cog):
         print(f'{ctx.author} generated with Jim: {text}')
         await ctx.send(file=discord.File('./generated/jim.jpg'))
 
-    @commands.command()
+    @commands.command(name='uno')
     async def uno(self, ctx, *, text=""):
         template = Image.open('./templates/uno.jpg')
         name = 'uno.jpg'
@@ -173,5 +179,5 @@ class Images(commands.Cog):
         await ctx.send(file=discord.File(f'./generated/{name}'))
 
 
-def setup(client):
-    client.add_cog(Images(client))
+async def setup(bot):
+    await bot.add_cog(Images(bot))
