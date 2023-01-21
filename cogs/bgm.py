@@ -4,22 +4,24 @@ from discord.utils import get
 import os
 
 ost_path = 'C:/Users/USERNAME/Music/OST/'
+time = "day"
 
 
-class BGM(commands.Cog):
-
-    time = "day"
-
+class BGM(commands.Cog, name='bgm'):
     def __init__(self, client):
         self.client = client
+
+    # New async cog_load special method is automatically called
+    async def cog_load(self):
+        print("BGM: Loaded.")
 
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print("BGM: Loaded.")
+        print("BGM: Ready!")
 
     # Aliases = Shorthand/Alternatives for the command
-    @commands.command(aliases=['t', 'time'], help="Changes \"Time of day\" for DPPt OST")
+    @commands.command(name='settime', aliases=['t', 'time'], help="Changes \"Time of day\" for DPPt OST")
     async def settime(self, ctx, new_time=""):
         new_time = new_time.lower()
         if new_time in ['d', 'day', 'daytime']:
@@ -28,7 +30,7 @@ class BGM(commands.Cog):
             BGM.time = 'night'
         await ctx.send(f'Time is set to {BGM.time}.')
 
-    @commands.command(aliases=['bg', 'playfile', 'ost'], help="I will try to play this song in our files!")
+    @commands.command(name='bgm', aliases=['bg', 'playfile', 'ost'], help="I will try to play this song in our files!")
     async def bgm(self, ctx, *, filename: str):
         voice = get(self.client.voice_clients, guild=ctx.guild)
 
@@ -64,7 +66,7 @@ class BGM(commands.Cog):
             await ctx.send(f"Playing {nname[0]}")
             print("Playing...")
 
-    @commands.command(aliases=['playlist', 'ostlist'], help="Gives a list of all songs available.")
+    @commands.command(name='songlist', aliases=['playlist', 'ostlist'], help="Gives a list of all songs available.")
     async def songlist(self, ctx):
         ost_list = []
         append_list(self, ost_list, f'{ost_path}Day')
@@ -90,5 +92,5 @@ def find_file(self, filename, ost_dir):
     return found, name
 
 
-def setup(client):
-    client.add_cog(BGM(client))
+async def setup(bot):
+    await bot.add_cog(BGM(bot))
