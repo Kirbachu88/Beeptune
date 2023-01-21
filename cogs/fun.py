@@ -4,18 +4,21 @@ import random
 import textwrap
 
 
-class Fun(commands.Cog):
-
+class Fun(commands.Cog, name='fun'):
     def __init__(self, client):
         self.client = client
+
+    # New async cog_load special method is automatically called
+    async def cog_load(self):
+        print("Fun: Loaded.")
 
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print("Fun: Loaded.")
+        print("Fun: Ready!")
 
     # Commands
-    @commands.command(pass_context=True, aliases=['tier', 'list', 'tierlist'])
+    @commands.command(name='rank', pass_context=True, aliases=['tier', 'list', 'tierlist'])
     async def rank(self, ctx, *, text=""):
         print(f'{ctx.author} generated a tier list: {text}')
         tier_list = [text]
@@ -45,7 +48,7 @@ class Fun(commands.Cog):
 
         await ctx.send(f'Here is your generated tier list!\n\n{generated_list}')
 
-    @commands.command(pass_context=True, aliases=['coin', 'coinflip'])
+    @commands.command(name='flip', pass_context=True, aliases=['coin', 'coinflip'])
     async def flip(self, ctx, text=""):
         if text.isnumeric():
             count = int(text)
@@ -96,5 +99,5 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Fun(client))
+async def setup(bot):
+    await bot.add_cog(Fun(bot))
