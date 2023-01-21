@@ -2,21 +2,25 @@ import discord
 from discord.ext import commands
 
 
-class AdminSettings(commands.Cog):
+class AdminSettings(commands.Cog, name='admin_settings'):
+    def __init__(self, bot):
+        self.client = bot
 
-    def __init__(self, client):
-        self.client = client
+    # New async cog_load special method is automatically called
+    async def cog_load(self):
+        print("Admin_Settings: Loaded.")
 
-    async def cog_check(self, ctx):
-        return ctx.author.id == 'Your Discord ID'
+    # async def cog_check(self, ctx):
+        # return ctx.author.id == 'Your Discord ID'
 
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
-        print("Info: Loaded.")
+        print("Admin_Settings: Ready!")
 
     # Commands
-    @commands.command()
+    @commands.is_owner()
+    @commands.command(name='status', hidden=True)
     async def status(self, ctx, arg1="", arg2="", arg3=""):
         verb = str(arg1)
         noun = str(arg2)
@@ -47,5 +51,5 @@ class AdminSettings(commands.Cog):
             await ctx.send("Using default status!")
 
 
-def setup(client):
-    client.add_cog(AdminSettings(client))
+async def setup(bot):
+    await bot.add_cog(AdminSettings(bot))
