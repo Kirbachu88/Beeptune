@@ -1,17 +1,65 @@
+import asyncio
+import aiohttp
 import discord
 import os
-from discord.ext import commands
+from discord.ext import commands, tasks
 
-def get_prefix(bot, message):
-    prefixes = ['b! ', 'b!', 'B! ', 'B!']
+# def get_prefix(bot, message):
+#     prefixes = ['b! ', 'b!', 'B! ', 'B!']
+#
+#     if not message.guild:
+#         return 'b!'
+#
+#     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-    if not message.guild:
-        return 'b!'
 
-    return commands.when_mentioned_or(*prefixes)(bot, message)
+class Beeptune(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix='b!', case_insensitive=True, intents=intents)
+        self.initial_extensions = [
+            'cogs.admin_settings',
+            'cogs.bgm',
+            'cogs.fun',
+            'cogs.images',
+            'cogs.info'
+        ]
+
+    async def setup_hook(self):
+        self.background_task.start()
+        self.session = aiohttp.ClientSession()
+        for ext in self.initial_extensions:
+            await self.load_extension(ext)
+
+    async def close(self):
+        await super().close()
+        await self.session.close()
+
+    @tasks.loop(minutes=10)
+    async def background_task(self):
+        print('Running background task...')
+
+    async def on_ready(self):
+        print('Ready!')
 
 
-client = commands.Bot(command_prefix=get_prefix, case_insensitive=True)
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = Beeptune()
+bot.run('bot token goes here', reconnect=True)
+
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        async with bot:
+            bot.session = session
+            await bot.start('token')
+
+asyncio.run(main())
+
+# intents = discord.Intents.default()
+# intents.message_content = True
+# bot = commands.Bot(intents=intents, command_prefix=get_prefix, case_insensitive=True)
 
 
 class CustomHelp(commands.MinimalHelpCommand):
@@ -28,54 +76,22 @@ class CustomHelp(commands.MinimalHelpCommand):
 
 attributes = {
     'aliases': ['halp'],
-    'cooldown': commands.Cooldown(2, 7.0, commands.BucketType.user)
+    'cooldown': commands.Cooldown(2, 7.0)
+    # 2, 7.0, commands.BucketType.user
 }
 
-client.help_command = CustomHelp(command_attrs=attributes)
+# bot.help_command = CustomHelp()
+# CustomHelp(command_attrs=attributes)
 
 
-def is_owner(ctx):
-    return ctx.author.id == 'Your Discord ID'
-
-
-@client.event
-async def on_command_error(ctx, error):
-    error = getattr(error, "original", error)
-    if isinstance(error, commands.ExtensionNotFound):
-        error = 'Couldn\'t find that!'
-    elif isinstance(error, commands.ExtensionAlreadyLoaded):
-        error = 'Already loaded that!'
-    elif isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f'You\'re going too fast! (Wait {str(error)[-5:]})', delete_after=5)
-        return
-    await ctx.send(error)
-
-
-@client.command()
-@commands.check(is_owner)
-async def load(ctx, extension):
-    client.load_extension(f'cogs.{extension}')
-    await ctx.send("Loaded.")
-
-
-@client.command()
-@commands.check(is_owner)
-async def unload(ctx, extension):
-    client.unload_extension(f'cogs.{extension}')
-    await ctx.send("Unloaded.")
-
-
-@client.command()
-@commands.check(is_owner)
-async def reload(ctx, extension):
-    client.unload_extension(f'cogs.{extension}')
-    client.load_extension(f'cogs.{extension}')
-    await ctx.send("Done.")
-
-
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        # Remove the last 3 characters to get rid of '.py'
-        client.load_extension(f'cogs.{filename[:-3]}')
-
-client.run('bot token goes here')
+# @client.command()
+# @commands.check(is_owner)
+# async def cogs(ctx, extension):
+# @client.command()
+# @commands.check(is_owner)
+# async def startup(ctx):
+#     for filename in os.listdir('./cogs'):
+#         if filename.endswith('.py'):
+            # Remove the last 3 characters to get rid of '.py'
+            # client.load_extension(f'cogs.{filename[:-3]}')
+            # await client.add_cog(Info(client))
